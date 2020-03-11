@@ -66,3 +66,6 @@
 /home/alvan/Projects/AnbarUchotu/bin/Debug/netcoreapp3.1/Microsoft.IdentityModel.Tokens.dll
 /home/alvan/Projects/AnbarUchotu/bin/Debug/netcoreapp3.1/Newtonsoft.Json.dll
 /home/alvan/Projects/AnbarUchotu/bin/Debug/netcoreapp3.1/System.IdentityModel.Tokens.Jwt.dll
+/home/alvan/Projects/AnbarUchotu/bin/Debug/netcoreapp3.1/Microsoft.AspNetCore.JsonPatch.dll
+/home/alvan/Projects/AnbarUchotu/bin/Debug/netcoreapp3.1/Microsoft.AspNetCore.Mvc.NewtonsoftJson.dll
+/home/alvan/Projects/AnbarUchotu/bin/Debug/netcoreapp3.1/Newtonsoft.Json.Bson.dll

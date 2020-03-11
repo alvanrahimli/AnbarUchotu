@@ -10,7 +10,5 @@ namespace AnbarUchotu.Repos.Products
         Task<ProductReturnDto> Product(string guid);
         Task<ProductReturnDto> Register(ProductRegisterDto product);
         Task<ProductReturnDto> Update(ProductUpdateDto product);
-        Task<TransactionReturnDto> Buy(string uGuid, List<ProductBuyDto> products);
-        Task<TransactionReturnDto> Retrieve(string tGuid);
     }
 }

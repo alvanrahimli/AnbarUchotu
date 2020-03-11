@@ -16,42 +16,6 @@ namespace AnbarUchotu.Migrations
             modelBuilder
                 .HasAnnotation("ProductVersion", "3.1.1");
 
-            modelBuilder.Entity("AnbarUchotu.Models.BankCard", b =>
-                {
-                    b.Property<string>("Guid")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("AcceptedTransactionsCount")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<decimal>("Balance")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("CardNumber")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("IssuedTransactionsCount")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("OwnerGuid")
-                        .HasColumnType("TEXT");
-
-                    b.Property<decimal>("TotalCancelled")
-                        .HasColumnType("TEXT");
-
-                    b.Property<decimal>("TotalExpense")
-                        .HasColumnType("TEXT");
-
-                    b.Property<decimal>("TotalIncome")
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Guid");
-
-                    b.ToTable("BankCards");
-                });
-
             modelBuilder.Entity("AnbarUchotu.Models.Product", b =>
                 {
                     b.Property<string>("Guid")
@@ -77,15 +41,10 @@ namespace AnbarUchotu.Migrations
                         .HasColumnType("TEXT")
                         .HasMaxLength(50);
 
-                    b.Property<string>("OwnerGuid")
-                        .HasColumnType("TEXT");
-
                     b.Property<decimal>("Price")
                         .HasColumnType("TEXT");
 
                     b.HasKey("Guid");
-
-                    b.HasIndex("OwnerGuid");
 
                     b.ToTable("Products");
                 });
@@ -116,10 +75,6 @@ namespace AnbarUchotu.Migrations
             modelBuilder.Entity("AnbarUchotu.Models.Transaction", b =>
                 {
                     b.Property<string>("Guid")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("AcceptorGuid")
                         .HasColumnType("TEXT");
 
                     b.Property<decimal>("Amount")
@@ -142,8 +97,6 @@ namespace AnbarUchotu.Migrations
 
                     b.HasKey("Guid");
 
-                    b.HasIndex("AcceptorGuid");
-
                     b.HasIndex("IssuerGuid");
 
                     b.ToTable("Transactions");
@@ -153,9 +106,6 @@ namespace AnbarUchotu.Migrations
                 {
                     b.Property<string>("Guid")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("CardGuid")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Email")
@@ -185,25 +135,14 @@ namespace AnbarUchotu.Migrations
 
                     b.HasKey("Guid");
 
-                    b.HasIndex("CardGuid")
-                        .IsUnique();
-
                     b.ToTable("Users");
-                });
-
-            modelBuilder.Entity("AnbarUchotu.Models.Product", b =>
-                {
-                    b.HasOne("AnbarUchotu.Models.User", "Owner")
-                        .WithMany()
-                        .HasForeignKey("OwnerGuid");
                 });
 
             modelBuilder.Entity("AnbarUchotu.Models.SoldProduct", b =>
                 {
                     b.HasOne("AnbarUchotu.Models.Product", "Product")
-                        .WithMany("SoldProducts")
-                        .HasForeignKey("ProductGuid")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .WithMany()
+                        .HasForeignKey("ProductGuid");
 
                     b.HasOne("AnbarUchotu.Models.Transaction", "Transaction")
                         .WithMany("Content")
@@ -213,23 +152,9 @@ namespace AnbarUchotu.Migrations
 
             modelBuilder.Entity("AnbarUchotu.Models.Transaction", b =>
                 {
-                    b.HasOne("AnbarUchotu.Models.BankCard", "Acceptor")
-                        .WithMany("AcceptedTransactions")
-                        .HasForeignKey("AcceptorGuid")
-                        .OnDelete(DeleteBehavior.Cascade);
-
-                    b.HasOne("AnbarUchotu.Models.BankCard", "Issuer")
-                        .WithMany("IssuedTransactions")
-                        .HasForeignKey("IssuerGuid")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
-
-            modelBuilder.Entity("AnbarUchotu.Models.User", b =>
-                {
-                    b.HasOne("AnbarUchotu.Models.BankCard", "Card")
-                        .WithOne("Owner")
-                        .HasForeignKey("AnbarUchotu.Models.User", "CardGuid")
-                        .OnDelete(DeleteBehavior.Cascade);
+                    b.HasOne("AnbarUchotu.Models.User", "Issuer")
+                        .WithMany()
+                        .HasForeignKey("IssuerGuid");
                 });
 #pragma warning restore 612, 618
         }

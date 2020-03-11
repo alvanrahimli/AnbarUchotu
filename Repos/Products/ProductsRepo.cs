@@ -72,8 +72,12 @@ namespace AnbarUchotu.Repos.Products
 
             await _context.Products.AddAsync(newProduct);
             var result = await _context.SaveChangesAsync();
-            var returnValue = await Product(newProduct.Guid);
-            return returnValue;
+            if(result > 0)
+            {
+                var returnValue = await Product(newProduct.Guid);
+                return returnValue;
+            }
+            return null;
         }
 
         public async Task<ProductReturnDto> Update(ProductUpdateDto product)
@@ -95,89 +99,6 @@ namespace AnbarUchotu.Repos.Products
 
             var p = await Product(product.Guid);
             return p;
-        }
-
-        public async Task<TransactionReturnDto> Buy(string uGuid, List<ProductBuyDto> wantedProducts)
-        {
-            // Create transaction:
-            var transaction = new Transaction()
-            {
-                Guid = Guid.NewGuid().ToString(),
-                IssueDate = DateTime.Now,
-                IssuerGuid = uGuid,
-                Status = TransactionStatus.Pending,
-                ApprovalDate = null,
-                CancellationDate = null
-            };
-
-            // Create SoldProducts(Content field of Transaction) & calc total amount:
-            decimal amount = 0;
-            var content = new List<SoldProduct>();
-            for (int i = 0; i < wantedProducts.Count; i++)
-            {
-                var product = await _context.Products
-                    .Select(p => new SoldProduct()
-                    {
-                        Guid = p.Guid,
-                        ProductGuid = p.Guid,
-                        SoldCount = wantedProducts[i].Count,
-                        TransactionGuid = transaction.Guid
-                    })
-                    .FirstOrDefaultAsync(p => p.Guid == wantedProducts[i].Guid);
-                if (product != null)
-                {
-                    var p = await _context.Products
-                        .FirstOrDefaultAsync(p => p.Guid == wantedProducts[i].Guid);
-                    amount += p.Price * product.SoldCount;
-                    content.Add(product);
-                }
-            }
-            transaction.Content = content;
-            transaction.Amount = amount;
-
-            await _context.Transactions.AddAsync(transaction);
-            var result = await _context.SaveChangesAsync();
-
-            // Return transaction:
-            if (result > 0)
-            {
-                var transactionReturnDto = await _context.Transactions
-                    .Select(t => new TransactionReturnDto()
-                    {
-                        Guid = t.Guid,
-                        IssueDate = t.IssueDate,
-                        ApprovalDate = t.ApprovalDate,
-                        CancellationDate = t.CancellationDate,
-                        Status = t.Status,
-                        IssuerGuid = t.IssuerGuid
-                    })
-                    .FirstOrDefaultAsync(t => t.Guid == transaction.Guid);
-
-                var contentReturn = await _context.SoldProducts
-                    .Include(p => p.Product)
-                    .Where(p => p.TransactionGuid == transaction.Guid)
-                    .Select(p => new SoldProductReturnDto()
-                    {
-                        Guid = p.Guid,
-                        Name = p.Product.Name,
-                        Description = p.Product.Description,
-                        Barcode = p.Product.Barcode,
-                        Count = p.Product.Count,
-                        Mass = p.Product.Mass,
-                        Price = p.Product.Price,
-                        SoldCount = p.SoldCount
-                    })
-                    .ToListAsync();
-
-                transactionReturnDto.Content = contentReturn;
-                return transactionReturnDto;
-            }
-            return null;
-        }
-
-        public Task<TransactionReturnDto> Retrieve(string tGuid)
-        {
-            throw new System.NotImplementedException(); // TODO;
         }
     }
 }
