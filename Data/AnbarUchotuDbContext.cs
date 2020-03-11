@@ -16,7 +16,14 @@ namespace AnbarUchotu.Data
                 .WithOne(sp => sp.Transaction)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            builder.Entity<SoldProduct>()
+                .HasOne(s => s.Product)
+                .WithMany(p => p.SoldProducts);
 
+            builder.Entity<Product>()
+                .HasMany(p => p.SoldProducts)
+                .WithOne(s => s.Product)
+                .OnDelete(DeleteBehavior.SetNull);
         }
 
         public DbSet<User> Users { get; set; }

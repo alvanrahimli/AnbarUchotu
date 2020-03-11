@@ -7,7 +7,6 @@ namespace AnbarUchotu.Models
     public class Product
     {
         [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public string Guid { get; set; }
 
         [Required]
@@ -28,5 +27,7 @@ namespace AnbarUchotu.Models
 
         [Required]
         public int Count { get; set; }
+
+        public ICollection<SoldProduct> SoldProducts { get; set; }
     }
 }

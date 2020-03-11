@@ -44,6 +44,7 @@ namespace AnbarUchotu.Repos.Transactions
 
             for (int i = 0; i < wantedProducts.Count; i++)
             {
+                // get product with wantedProducts' Guid field:
                 var product = await _context.Products
                     .Select(p => new 
                     {
@@ -63,6 +64,8 @@ namespace AnbarUchotu.Repos.Transactions
 
                 if (product != null)
                 {
+                    // If product is found add it to transaction content
+                    // and add price to amount:
                     var p = await _context.Products
                         .FirstOrDefaultAsync(p => p.Guid == wantedProducts[i].Guid);
                     amount += p.Price * product.SoldProduct.SoldCount;
@@ -70,7 +73,7 @@ namespace AnbarUchotu.Repos.Transactions
                 }
                 else
                 {
-                    // To return products which user couldn't buy add them to 'unableToBuyProducts' variable:
+                    // To return products which user couldn't buy add them to 'unableToBuyProducts' list:
                     var unableProduct = await _productsRepo
                         .Product(wantedProducts[i].Guid);
                     unableToBuyProducts.Add(unableProduct);
@@ -85,35 +88,7 @@ namespace AnbarUchotu.Repos.Transactions
             // Return transaction:
             if (result > 0)
             {
-                var transactionReturn = await _context.Transactions
-                    .Select(t => new TransactionReturnDto()
-                    {
-                        Guid = t.Guid,
-                        IssueDate = t.IssueDate,
-                        ApprovalDate = t.ApprovalDate,
-                        CancellationDate = t.CancellationDate,
-                        Status = t.Status,
-                        IssuerGuid = t.IssuerGuid
-                    })
-                    .FirstOrDefaultAsync(t => t.Guid == transaction.Guid);
-
-                var contentReturn = await _context.SoldProducts
-                    .Include(p => p.Product)
-                    .Where(p => p.TransactionGuid == transaction.Guid)
-                    .Select(p => new SoldProductReturnDto()
-                    {
-                        Guid = p.Guid,
-                        Name = p.Product.Name,
-                        Description = p.Product.Description,
-                        Barcode = p.Product.Barcode,
-                        Count = p.Product.Count,
-                        Mass = p.Product.Mass,
-                        Price = p.Product.Price,
-                        SoldCount = p.SoldCount
-                    })
-                    .ToListAsync();
-
-                transactionReturn.Content = contentReturn;
+                var transactionReturn = await GetTransaction(transaction.Guid);
                 return (transactionReturn, unableToBuyProducts);
             }
             return (null, null);
@@ -131,7 +106,7 @@ namespace AnbarUchotu.Repos.Transactions
                 transaction.Status = TransactionStatus.Signed;
             }
 
-            // Update product (reduce count):
+            // Update products (reduce count):
             var content = transaction.Content.ToList();
             for (int i = 0; i < content.Count; i++)
             {
@@ -140,14 +115,60 @@ namespace AnbarUchotu.Repos.Transactions
 
                 if (product != null)
                 {
-                    product.Count -= content[i].SoldCount
+                    product.Count -= content[i].SoldCount;
                 }
             }
+            var result = await _context.SaveChangesAsync();
+            
+            return result > 0 ? true : false;
         }
 
-        public Task<bool> CancelTransaction(string tGuid)
+        public async Task<bool> CancelTransaction(string tGuid)
         {
-            throw new System.NotImplementedException();
+            var transaction = await _context.Transactions
+                .FirstOrDefaultAsync(t => t.Guid == tGuid);
+
+            if (transaction != null)
+            {
+                transaction.Status = TransactionStatus.Cancelled;
+            }
+            var result = await _context.SaveChangesAsync();
+
+            return result > 0 ? true : false;
+        }
+
+        public async Task<TransactionReturnDto> GetTransaction(string guid)
+        {
+            var transaction = await _context.Transactions
+                .Select(t => new TransactionReturnDto()
+                {
+                    Guid = t.Guid,
+                    IssueDate = t.IssueDate,
+                    ApprovalDate = t.ApprovalDate,
+                    CancellationDate = t.CancellationDate,
+                    Status = t.Status,
+                    IssuerGuid = t.IssuerGuid
+                })
+                .FirstOrDefaultAsync(t => t.Guid == guid);
+
+            var contentReturn = await _context.SoldProducts
+                .Include(p => p.Product)
+                .Where(p => p.TransactionGuid == guid)
+                .Select(p => new SoldProductReturnDto()
+                {
+                    Guid = p.Guid,
+                    Name = p.Product.Name,
+                    Description = p.Product.Description,
+                    Barcode = p.Product.Barcode,
+                    Count = p.Product.Count,
+                    Mass = p.Product.Mass,
+                    Price = p.Product.Price,
+                    SoldCount = p.SoldCount
+                })
+                .ToListAsync();
+
+            transaction.Content = contentReturn;
+            return transaction;
         }
     }
 }

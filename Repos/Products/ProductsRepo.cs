@@ -100,5 +100,19 @@ namespace AnbarUchotu.Repos.Products
             var p = await Product(product.Guid);
             return p;
         }
+
+        public async Task<bool> Delete(string guid)
+        {
+            var product = await _context.Products
+                .FirstOrDefaultAsync(p => p.Guid == guid);
+
+            if(product != null)
+            {
+                _context.Products.Remove(product);
+                await _context.SaveChangesAsync();
+                return true;
+            }
+            return false;
+        }
     }
 }
