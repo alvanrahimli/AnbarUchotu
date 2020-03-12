@@ -140,6 +140,7 @@ namespace AnbarUchotu.Repos.Transactions
         public async Task<TransactionReturnDto> GetTransaction(string guid)
         {
             var transaction = await _context.Transactions
+                .AsNoTracking()
                 .Select(t => new TransactionReturnDto()
                 {
                     Guid = t.Guid,
@@ -152,6 +153,7 @@ namespace AnbarUchotu.Repos.Transactions
                 .FirstOrDefaultAsync(t => t.Guid == guid);
 
             var contentReturn = await _context.SoldProducts
+                .AsNoTracking()
                 .Include(p => p.Product)
                 .Where(p => p.TransactionGuid == guid)
                 .Select(p => new SoldProductReturnDto()

@@ -23,7 +23,5 @@ namespace AnbarUchotu.Models
         public string NormalizedEmail { get; set; }
         [Required]
         public byte[] PasswordHash { get; set; }
-        [Required]
-        public Role Role { get; set; }
     }
 }

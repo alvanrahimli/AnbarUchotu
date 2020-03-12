@@ -22,6 +22,7 @@ namespace AnbarUchotu.Repos.Products
         public async Task<ProductReturnDto> Product(string guid)
         {
             var product = await _context.Products
+                .AsNoTracking()
                 .Select(p => new ProductReturnDto()
                 {
                     Guid = p.Guid,
@@ -40,6 +41,7 @@ namespace AnbarUchotu.Repos.Products
         public async Task<List<ProductReturnDto>> Products(int rn, int c)
         {
             var products = await _context.Products
+                .AsNoTracking()
                 .Skip((rn - 1) * c)
                 .Take(c)
                 .Select(p => new ProductReturnDto()

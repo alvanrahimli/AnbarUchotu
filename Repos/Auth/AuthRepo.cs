@@ -46,7 +46,6 @@ namespace AnbarUchotu.Repos.Auth
             var claims = new[]
             {
                 new Claim(JwtRegisteredClaimNames.Sub, userInfo.Guid),
-                new Claim("Role", userInfo.Role.ToString()),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                 new Claim(JwtRegisteredClaimNames.Aud, _config["Jwt:Audience"])
             };
@@ -78,8 +77,7 @@ namespace AnbarUchotu.Repos.Auth
                     {
                         Guid = usr.Guid,
                         Username = usr.Username,
-                        Email = usr.Email,
-                        Role = usr.Role
+                        Email = usr.Email
                     };
                     return userReturnDto;
                 }
@@ -100,8 +98,7 @@ namespace AnbarUchotu.Repos.Auth
                     NormalizedEmail = userCreds.Email.ToLower(),
                     Username = userCreds.Username,
                     NormalizedUsername = userCreds.Username.ToLower(),
-                    PasswordHash = Helper.ComputeHash(userCreds.Password),
-                    Role = Role.Consumer
+                    PasswordHash = Helper.ComputeHash(userCreds.Password)
                 };
 
                 await _context.Users.AddAsync(newUser);

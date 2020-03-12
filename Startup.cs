@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using AnbarUchotu.Data;
 using AnbarUchotu.Repos.Auth;
+using AnbarUchotu.Repos.Products;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -65,6 +66,7 @@ namespace AnbarUchotu
                 options.UseSqlite(_config["ConStrs:Development"]);
             });
             services.AddScoped<IAuthRepo, AuthRepo>();
+            services.AddScoped<IProductsRepo, ProductsRepo>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
