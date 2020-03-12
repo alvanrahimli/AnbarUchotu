@@ -74,7 +74,7 @@ namespace AnbarUchotu.Repos.Products
 
             await _context.Products.AddAsync(newProduct);
             var result = await _context.SaveChangesAsync();
-            if(result > 0)
+            if (result > 0)
             {
                 var returnValue = await Product(newProduct.Guid);
                 return returnValue;
@@ -108,13 +108,44 @@ namespace AnbarUchotu.Repos.Products
             var product = await _context.Products
                 .FirstOrDefaultAsync(p => p.Guid == guid);
 
-            if(product != null)
+            if (product != null)
             {
                 _context.Products.Remove(product);
                 await _context.SaveChangesAsync();
                 return true;
             }
             return false;
+        }
+
+        public async Task<ProductReturnDto> AddExisting(string barcode, int count)
+        {
+            var product = await _context.Products
+                .FirstOrDefaultAsync(p => p.Barcode == barcode);
+
+            if (product != null)
+            {
+                product.Count += count;
+                int res = await _context.SaveChangesAsync();
+                if (res > 0)
+                {
+                    var returnProduct = await _context.Products
+                        .AsNoTracking()
+                        .Select(p => new ProductReturnDto()
+                        {
+                            Guid = p.Guid,
+                            Barcode = p.Barcode,
+                            Description = p.Description,
+                            Count = p.Count,
+                            Mass = p.Mass,
+                            Name = p.Name,
+                            Price = p.Price
+                        })
+                        .FirstOrDefaultAsync(p => p.Guid == product.Guid);
+
+                    return returnProduct;
+                }
+            }
+            return null;
         }
     }
 }

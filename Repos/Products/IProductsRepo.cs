@@ -9,6 +9,7 @@ namespace AnbarUchotu.Repos.Products
         Task<List<ProductReturnDto>> Products(int rn, int c);
         Task<ProductReturnDto> Product(string guid);
         Task<ProductReturnDto> Register(ProductRegisterDto product);
+        Task<ProductReturnDto> AddExisting(string barcode, int count);
         Task<ProductReturnDto> Update(ProductUpdateDto product);
         Task<bool> Delete(string guid);
     }

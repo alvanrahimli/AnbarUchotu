@@ -53,8 +53,8 @@ namespace AnbarUchotu.Controllers
             return NotFound();
         }
 
-        [HttpPost("add")]
-        public async Task<IActionResult> Add([FromBody]ProductRegisterDto product)
+        [HttpPost("register")]
+        public async Task<IActionResult> Register([FromBody]ProductRegisterDto product)
         {
             if (!ModelState.IsValid)
             {
@@ -78,6 +78,18 @@ namespace AnbarUchotu.Controllers
                 return BadRequest(ModelState);
             }
             var result = await _repo.Update(product);
+
+            if (result != null)
+            {
+                return Ok(result);
+            }
+            return StatusCode(500, "Something went wrong. Try again later");
+        }
+
+        [HttpPost("add/{barcode}")]
+        public async Task<IActionResult> AddCount(string barcode, int count)
+        {
+            var result = await _repo.AddExisting(barcode, count);
 
             if (result != null)
             {

@@ -79,6 +79,18 @@ namespace AnbarUchotu.Controllers
             return StatusCode(500, "Operation failed, try again.");
         }
 
+        [HttpPost("sign/all")]
+        public async Task<IActionResult> Sign()
+        {
+            var transactions = await _repo.SignAll();
+
+            if (transactions != null)
+            {
+                return Ok(transactions);
+            }
+            return StatusCode(500, "Operation failed, try again.");
+        }
+
         [HttpPost("cancel/{guid:guid}")]
         public async Task<IActionResult> Cancel(string guid)
         {

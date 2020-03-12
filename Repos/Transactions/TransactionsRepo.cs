@@ -100,10 +100,13 @@ namespace AnbarUchotu.Repos.Transactions
                 .Include(t => t.Content)
                 .FirstOrDefaultAsync(t => t.Guid == tGuid);
 
-            if (transaction != null)
+            if (transaction == null)
             {
-                transaction.Status = TransactionStatus.Signed;
+                return null;
             }
+
+            transaction.Status = TransactionStatus.Signed;
+            transaction.ApprovalDate = DateTime.Now;
 
             // Update products (reduce count):
             var content = transaction.Content.ToList();
@@ -135,6 +138,7 @@ namespace AnbarUchotu.Repos.Transactions
             if (transaction != null)
             {
                 transaction.Status = TransactionStatus.Cancelled;
+                transaction.CancellationDate = DateTime.Now;
             }
             var result = await _context.SaveChangesAsync();
 
@@ -197,6 +201,7 @@ namespace AnbarUchotu.Repos.Transactions
                     Status = t.Status,
                     Amount = t.Amount
                 })
+                .OrderByDescending(t => t.IssueDate)
                 .Skip((rn - 1) * c)
                 .Take(c)
                 .ToListAsync();
@@ -219,9 +224,42 @@ namespace AnbarUchotu.Repos.Transactions
                     IssuerGuid = t.IssuerGuid,
                     Amount = t.Amount
                 })
+                .OrderByDescending(t => t.IssueDate)
                 .ToListAsync();
 
             return transactions;
+        }
+
+        public async Task<List<TransactionReturnDto>> SignAll()
+        {
+            var transactions = await _context.Transactions
+                .AsNoTracking()
+                .Where(t => t.Status == TransactionStatus.Pending)
+                .ToListAsync();
+
+            if (transactions != null)
+            {
+                foreach (var t in transactions)
+                {
+                    var result = await Sign(t.Guid);
+                }
+
+                var transactionsToReturn = transactions
+                    .Select(t => new TransactionReturnDto()
+                    {
+                        Guid = t.Guid,
+                        Amount = t.Amount,
+                        ApprovalDate = t.ApprovalDate,
+                        CancellationDate = t.CancellationDate,
+                        IssueDate = t.IssueDate,
+                        IssuerGuid = t.IssuerGuid,
+                        Status = t.Status
+                    })
+                    .OrderByDescending(t => t.IssueDate)
+                    .ToList();
+                return transactionsToReturn;
+            }
+            return null;
         }
     }
 }
