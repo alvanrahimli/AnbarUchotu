@@ -22,7 +22,6 @@ namespace AnbarUchotu.Repos.Transactions
             this._productsRepo = productsRepo;
         }
 
-        // To buy product, u must create transaction:
         public async Task<(TransactionReturnDto transaction, List<ProductReturnDto> unableProducts)> Create(string uGuid, List<ProductBuyDto> wantedProducts)
         {
             // Create transaction:
@@ -46,19 +45,19 @@ namespace AnbarUchotu.Repos.Transactions
             {
                 // get product with wantedProducts' Guid field:
                 var product = await _context.Products
-                    .Select(p => new 
+                    .Select(p => new
                     {
                         StockCount = p.Count,
                         SoldProduct = new SoldProduct()
                         {
-                            Guid = p.Guid,
+                            Guid = Guid.NewGuid().ToString(),
                             ProductGuid = p.Guid,
                             SoldCount = wantedProducts[i].Count,
                             TransactionGuid = transaction.Guid
                         }
                     })
                     .FirstOrDefaultAsync(
-                        p => p.SoldProduct.Guid == wantedProducts[i].Guid
+                        p => p.SoldProduct.ProductGuid == wantedProducts[i].Guid
                         && p.StockCount >= wantedProducts[i].Count
                     );
 
@@ -94,7 +93,7 @@ namespace AnbarUchotu.Repos.Transactions
             return (null, null);
         }
 
-        public async Task<bool> Sign(string tGuid)
+        public async Task<TransactionReturnDto> Sign(string tGuid)
         {
             // Update transaction:
             var transaction = await _context.Transactions
@@ -111,7 +110,7 @@ namespace AnbarUchotu.Repos.Transactions
             for (int i = 0; i < content.Count; i++)
             {
                 var product = await _context.Products
-                    .FirstOrDefaultAsync(p => p.Guid == content[i].Guid);
+                    .FirstOrDefaultAsync(p => p.Guid == content[i].ProductGuid);
 
                 if (product != null)
                 {
@@ -119,14 +118,19 @@ namespace AnbarUchotu.Repos.Transactions
                 }
             }
             var result = await _context.SaveChangesAsync();
-            
-            return result > 0 ? true : false;
+
+            if (result > 0)
+            {
+                var t = await GetTransaction(tGuid);
+                return t;
+            }
+            return null;
         }
 
-        public async Task<bool> CancelTransaction(string tGuid)
+        public async Task<TransactionReturnDto> CancelTransaction(string tGuid)
         {
             var transaction = await _context.Transactions
-                .FirstOrDefaultAsync(t => t.Guid == tGuid);
+                .FirstOrDefaultAsync(t => t.Guid == tGuid && t.Status == TransactionStatus.Pending);
 
             if (transaction != null)
             {
@@ -134,7 +138,12 @@ namespace AnbarUchotu.Repos.Transactions
             }
             var result = await _context.SaveChangesAsync();
 
-            return result > 0 ? true : false;
+            if (result > 0)
+            {
+                var t = await GetTransaction(tGuid);
+                return t;
+            }
+            return null;
         }
 
         public async Task<TransactionReturnDto> GetTransaction(string guid)
@@ -148,7 +157,8 @@ namespace AnbarUchotu.Repos.Transactions
                     ApprovalDate = t.ApprovalDate,
                     CancellationDate = t.CancellationDate,
                     Status = t.Status,
-                    IssuerGuid = t.IssuerGuid
+                    IssuerGuid = t.IssuerGuid,
+                    Amount = t.Amount
                 })
                 .FirstOrDefaultAsync(t => t.Guid == guid);
 
@@ -171,6 +181,47 @@ namespace AnbarUchotu.Repos.Transactions
 
             transaction.Content = contentReturn;
             return transaction;
+        }
+
+        public async Task<List<TransactionReturnDto>> GetTransactions(int rn, int c)
+        {
+            var transactions = await _context.Transactions
+                .AsNoTracking()
+                .Select(t => new TransactionReturnDto()
+                {
+                    Guid = t.Guid,
+                    IssuerGuid = t.IssuerGuid,
+                    IssueDate = t.IssueDate,
+                    ApprovalDate = t.ApprovalDate,
+                    CancellationDate = t.CancellationDate,
+                    Status = t.Status,
+                    Amount = t.Amount
+                })
+                .Skip((rn - 1) * c)
+                .Take(c)
+                .ToListAsync();
+
+            return transactions;
+        }
+
+        public async Task<List<TransactionReturnDto>> GetTransactionsByStatus(TransactionStatus status)
+        {
+            var transactions = await _context.Transactions
+                .AsNoTracking()
+                .Where(t => t.Status == status)
+                .Select(t => new TransactionReturnDto()
+                {
+                    Guid = t.Guid,
+                    IssueDate = t.IssueDate,
+                    ApprovalDate = t.ApprovalDate,
+                    CancellationDate = t.CancellationDate,
+                    Status = t.Status,
+                    IssuerGuid = t.IssuerGuid,
+                    Amount = t.Amount
+                })
+                .ToListAsync();
+
+            return transactions;
         }
     }
 }

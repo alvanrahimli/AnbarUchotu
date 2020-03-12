@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AnbarUchotu.Migrations
 {
     [DbContext(typeof(AnbarUchotuDbContext))]
-    [Migration("20200310195040_Initial")]
+    [Migration("20200312180009_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -21,7 +21,6 @@ namespace AnbarUchotu.Migrations
             modelBuilder.Entity("AnbarUchotu.Models.Product", b =>
                 {
                     b.Property<string>("Guid")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Barcode")
@@ -127,9 +126,6 @@ namespace AnbarUchotu.Migrations
                         .IsRequired()
                         .HasColumnType("BLOB");
 
-                    b.Property<int>("Role")
-                        .HasColumnType("INTEGER");
-
                     b.Property<string>("Username")
                         .IsRequired()
                         .HasColumnType("TEXT")
@@ -143,8 +139,9 @@ namespace AnbarUchotu.Migrations
             modelBuilder.Entity("AnbarUchotu.Models.SoldProduct", b =>
                 {
                     b.HasOne("AnbarUchotu.Models.Product", "Product")
-                        .WithMany()
-                        .HasForeignKey("ProductGuid");
+                        .WithMany("SoldProducts")
+                        .HasForeignKey("ProductGuid")
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.HasOne("AnbarUchotu.Models.Transaction", "Transaction")
                         .WithMany("Content")

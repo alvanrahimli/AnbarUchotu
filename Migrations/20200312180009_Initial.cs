@@ -33,8 +33,7 @@ namespace AnbarUchotu.Migrations
                     Email = table.Column<string>(nullable: false),
                     NormalizedUsername = table.Column<string>(maxLength: 50, nullable: false),
                     NormalizedEmail = table.Column<string>(nullable: false),
-                    PasswordHash = table.Column<byte[]>(nullable: false),
-                    Role = table.Column<int>(nullable: false)
+                    PasswordHash = table.Column<byte[]>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -81,7 +80,7 @@ namespace AnbarUchotu.Migrations
                         column: x => x.ProductGuid,
                         principalTable: "Products",
                         principalColumn: "Guid",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.SetNull);
                     table.ForeignKey(
                         name: "FK_SoldProducts_Transactions_TransactionGuid",
                         column: x => x.TransactionGuid,
