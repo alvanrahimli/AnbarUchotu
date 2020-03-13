@@ -14,5 +14,6 @@ namespace AnbarUchotu.Repos.Transactions
         Task<List<TransactionReturnDto>> SignAll();
         Task<TransactionReturnDto> CancelTransaction(string tGuid);
         Task<List<TransactionReturnDto>> GetTransactionsByStatus(TransactionStatus status);
+        Task<List<TransactionReturnDto>> GetForUser(string guid);
     }
 }

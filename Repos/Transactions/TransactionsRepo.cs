@@ -261,5 +261,25 @@ namespace AnbarUchotu.Repos.Transactions
             }
             return null;
         }
+
+        public async Task<List<TransactionReturnDto>> GetForUser(string guid)
+        {
+            var transactions = await _context.Transactions
+                .AsNoTracking()
+                .Where(t => t.IssuerGuid == guid)
+                .Select(t => new TransactionReturnDto()
+                {
+                    Guid = t.Guid,
+                    Amount = t.Amount,
+                    ApprovalDate = t.ApprovalDate,
+                    CancellationDate = t.CancellationDate,
+                    IssueDate = t.IssueDate,
+                    IssuerGuid = t.IssuerGuid,
+                    Status = t.Status
+                })
+                .ToListAsync();
+
+            return transactions;
+        }
     }
 }

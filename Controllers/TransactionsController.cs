@@ -33,7 +33,8 @@ namespace AnbarUchotu.Controllers
         }
 
         [HttpGet("all")]
-        public async Task<IActionResult> GetTransaction(int rn, int c)
+        [Authorize(Roles = "Seller")]
+        public async Task<IActionResult> GetTransactions(int rn, int c)
         {
             var transaction = await _repo.GetTransactions(rn, c);
 
@@ -68,6 +69,7 @@ namespace AnbarUchotu.Controllers
         }
 
         [HttpPost("sign/{guid:guid}")]
+        [Authorize(Roles = "Seller")]
         public async Task<IActionResult> Sign(string guid)
         {
             var transaction = await _repo.Sign(guid);
@@ -80,7 +82,8 @@ namespace AnbarUchotu.Controllers
         }
 
         [HttpPost("sign/all")]
-        public async Task<IActionResult> Sign()
+        [Authorize(Roles = "Seller")]
+        public async Task<IActionResult> SignAll()
         {
             var transactions = await _repo.SignAll();
 
@@ -104,6 +107,7 @@ namespace AnbarUchotu.Controllers
         }
 
         [HttpGet("{status}")]
+        [Authorize(Roles = "Seller")]
         public async Task<IActionResult> GetByStatus(string status)
         {
             List<TransactionReturnDto> transactions = new List<TransactionReturnDto>();
@@ -124,6 +128,19 @@ namespace AnbarUchotu.Controllers
             }
 
             if (transactions.Count > 0)
+            {
+                return Ok(transactions);
+            }
+            return NotFound();
+        }
+
+        [HttpGet("user")]
+        [Authorize(Roles = "Buyer")]
+        public async Task<IActionResult> GetForUser()
+        {
+            var user = Helper.GetCurrentUserGuid(HttpContext);
+            var transactions = await _repo.GetForUser(user);
+            if (transactions != null)
             {
                 return Ok(transactions);
             }

@@ -1,6 +1,8 @@
+using System.Linq;
 using System.Threading.Tasks;
 using AnbarUchotu.Models.Dtos;
 using AnbarUchotu.Repos.Auth;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -56,6 +58,19 @@ namespace AnbarUchotu.Controllers
             }
 
             return BadRequest("Username or Email is registered already.");
+        }
+
+
+        [Authorize]
+        [HttpGet("claims")]
+        public object Claims()
+        {
+            return User.Claims.Select(c =>
+            new
+            {
+                Type = c.Type,
+                Value = c.Value
+            });
         }
     }
 }

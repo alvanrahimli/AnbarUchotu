@@ -47,7 +47,8 @@ namespace AnbarUchotu.Repos.Auth
             {
                 new Claim(JwtRegisteredClaimNames.Sub, userInfo.Guid),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                new Claim(JwtRegisteredClaimNames.Aud, _config["Jwt:Audience"])
+                new Claim(JwtRegisteredClaimNames.Aud, _config["Jwt:Audience"]),
+                new Claim(type: "roles", value: userInfo.Role ?? "Buyer")
             };
 
             var token = new JwtSecurityToken(
@@ -77,7 +78,8 @@ namespace AnbarUchotu.Repos.Auth
                     {
                         Guid = usr.Guid,
                         Username = usr.Username,
-                        Email = usr.Email
+                        Email = usr.Email,
+                        Role = usr.Role ?? "Buyer"
                     };
                     return userReturnDto;
                 }

@@ -9,7 +9,7 @@ namespace AnbarUchotu.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize]
+    [Authorize(Roles = "Seller")]
     public class ProductsController : ControllerBase
     {
         private readonly IProductsRepo _repo;
@@ -20,6 +20,7 @@ namespace AnbarUchotu.Controllers
         }
 
         [HttpGet("{guid}")]
+        [Authorize(Roles = "Seller,Buyer")]
         public async Task<IActionResult> Product(string guid)
         {
             if (string.IsNullOrEmpty(guid))
@@ -37,6 +38,7 @@ namespace AnbarUchotu.Controllers
         }
 
         [HttpGet("all")]
+        [Authorize(Roles = "Seller,Buyer")]
         public async Task<IActionResult> Products(int rn, int c)
         {
             if (rn * c <= 0)

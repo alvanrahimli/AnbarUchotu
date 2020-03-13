@@ -33,7 +33,8 @@ namespace AnbarUchotu.Migrations
                     Email = table.Column<string>(nullable: false),
                     NormalizedUsername = table.Column<string>(maxLength: 50, nullable: false),
                     NormalizedEmail = table.Column<string>(nullable: false),
-                    PasswordHash = table.Column<byte[]>(nullable: false)
+                    PasswordHash = table.Column<byte[]>(nullable: false),
+                    Role = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
